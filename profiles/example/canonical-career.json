@@ -1,0 +1,157 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/master/schema.json",
+  "basics": {
+    "name": "Alex Example",
+    "label": "Senior Backend Engineer",
+    "email": "alex@example.test",
+    "url": "https://alex-example.test",
+    "summary": "Backend engineer with a decade of experience building reliable distributed systems across fintech, robotics, and analytics.",
+    "location": { "city": "Berlin", "region": "Berlin", "countryCode": "DE" },
+    "profiles": [
+      { "network": "LinkedIn", "username": "alex-example", "url": "https://www.linkedin.com/in/alex-example" }
+    ]
+  },
+  "work": [
+    {
+      "name": "Globex Systems",
+      "location": "Berlin, Germany",
+      "position": "Senior Backend Engineer",
+      "startDate": "2024-01",
+      "summary": "Leads backend services for a payments platform.",
+      "highlights": [
+        "Designed the event-driven ledger service handling 2M transactions a day",
+        "Cut p99 API latency by 40% through targeted query and cache optimization",
+        "Mentored three engineers and introduced a standard on-call rotation"
+      ],
+      "keywords": ["TypeScript", "PostgreSQL", "Kafka", "AWS"],
+      "x-cv": { "id": "work-globex-2025" }
+    },
+    {
+      "name": "Initech GmbH",
+      "location": "Berlin, Germany",
+      "position": "Backend Engineer",
+      "startDate": "2022-03",
+      "endDate": "2023-12",
+      "summary": "Built core services for an internal logistics platform.",
+      "highlights": [
+        "Migrated a monolith to a service-oriented architecture without downtime",
+        "Introduced contract testing between six internal teams",
+        "Reduced deployment time from 40 minutes to 6 minutes"
+      ],
+      "keywords": ["Java", "Kubernetes", "gRPC"],
+      "x-cv": { "id": "work-initech-2022" }
+    },
+    {
+      "name": "Acme Robotics",
+      "location": "Munich, Germany",
+      "position": "Software Engineer",
+      "startDate": "2020-01",
+      "endDate": "2022-02",
+      "summary": "Developed fleet-management software for warehouse robots.",
+      "highlights": [
+        "Implemented a real-time robot dispatch algorithm",
+        "Built a simulation harness that cut integration bugs in half"
+      ],
+      "keywords": ["Python", "ROS", "Redis"],
+      "x-cv": { "id": "work-acme-2020" }
+    },
+    {
+      "name": "Umbrella Analytics",
+      "location": "Remote",
+      "position": "Software Engineer",
+      "startDate": "2018-06",
+      "endDate": "2019-12",
+      "summary": "Delivered reporting tools for a data analytics SaaS.",
+      "highlights": [
+        "Built a self-serve dashboard used by 200+ customers",
+        "Automated the nightly ETL pipeline"
+      ],
+      "keywords": ["Node.js", "SQL"],
+      "x-cv": { "id": "work-umbrella-2018" }
+    },
+    {
+      "name": "Stark Industries Labs",
+      "location": "Madrid, Spain",
+      "position": "Junior Developer",
+      "startDate": "2016-01",
+      "endDate": "2018-05",
+      "summary": "Supported an R&D team building prototype IoT firmware.",
+      "highlights": [
+        "Wrote embedded C for sensor calibration",
+        "Documented the internal firmware release process"
+      ],
+      "keywords": ["C", "Embedded Systems"],
+      "x-cv": { "id": "work-stark-2016" }
+    },
+    {
+      "name": "Wayne Foundation",
+      "location": "Madrid, Spain",
+      "position": "IT Intern",
+      "startDate": "2013-09",
+      "endDate": "2015-12",
+      "summary": "Supported IT operations for a non-profit network.",
+      "highlights": ["Maintained internal ticketing and asset inventory tools"],
+      "keywords": ["IT Support"],
+      "x-cv": { "id": "work-wayne-2014" }
+    }
+  ],
+  "education": [
+    {
+      "institution": "Technical University of Munich",
+      "area": "Computer Science",
+      "studyType": "MSc",
+      "startDate": "2018",
+      "endDate": "2020",
+      "x-cv": { "id": "education-tum-msc" }
+    },
+    {
+      "institution": "Universidad Complutense de Madrid",
+      "area": "Computer Engineering",
+      "studyType": "BSc",
+      "startDate": "2012",
+      "endDate": "2016",
+      "x-cv": { "id": "education-ucm-bsc" }
+    }
+  ],
+  "awards": [
+    {
+      "title": "Engineering Excellence Award",
+      "date": "2021",
+      "awarder": "Globex Systems",
+      "summary": "Recognized for leading the ledger service redesign."
+    }
+  ],
+  "skills": [
+    { "name": "Backend Engineering", "keywords": ["TypeScript", "Java", "Python", "PostgreSQL", "Kafka"] },
+    { "name": "Cloud & Platform", "keywords": ["AWS", "Kubernetes", "Docker"] }
+  ],
+  "languages": [
+    {
+      "language": "Spanish",
+      "fluency": "C2",
+      "x-cv": { "id": "language-spanish", "proficiency": { "framework": "CEFR", "level": "C2", "status": "native" } }
+    },
+    {
+      "language": "English",
+      "fluency": "C2",
+      "x-cv": { "id": "language-english", "proficiency": { "framework": "CEFR", "level": "C2" } }
+    },
+    {
+      "language": "German",
+      "fluency": "C1",
+      "x-cv": { "id": "language-german", "proficiency": { "framework": "CEFR", "level": "C1" } }
+    },
+    {
+      "language": "French",
+      "fluency": "B1",
+      "x-cv": { "id": "language-french", "proficiency": { "framework": "CEFR", "level": "B1" } }
+    }
+  ],
+  "meta": {
+    "x-cv": {
+      "kind": "canonical",
+      "language": "en",
+      "source": "Synthetic example data maintained for the cv-generator open-source template."
+    }
+  }
+}

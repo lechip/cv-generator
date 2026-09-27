@@ -1,0 +1,130 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/master/schema.json",
+  "basics": {
+    "name": "Alex Example",
+    "label": "Senior Backend Engineer",
+    "email": "alex@example.test",
+    "url": "https://alex-example.test",
+    "summary": "Senior backend engineer focused on reliable, high-throughput payment and platform services.",
+    "location": { "city": "Berlin", "region": "Berlin", "countryCode": "DE" },
+    "profiles": [
+      { "network": "LinkedIn", "username": "alex-example", "url": "https://www.linkedin.com/in/alex-example" }
+    ]
+  },
+  "work": [
+    {
+      "name": "Globex Systems",
+      "location": "Berlin, Germany",
+      "position": "Senior Backend Engineer",
+      "startDate": "2024-01",
+      "summary": "Owns the backend services powering a payments platform.",
+      "highlights": [
+        "Designed an event-driven ledger service handling 2M transactions a day",
+        "Cut p99 API latency by 40% through query and cache optimization",
+        "Mentored three engineers and introduced a standard on-call rotation"
+      ],
+      "keywords": ["TypeScript", "PostgreSQL", "Kafka", "AWS"],
+      "x-cv": { "sourceId": "work-globex-2025" }
+    },
+    {
+      "name": "Initech GmbH",
+      "location": "Berlin, Germany",
+      "position": "Backend Engineer",
+      "startDate": "2022-03",
+      "endDate": "2023-12",
+      "summary": "Rebuilt core logistics services around a service-oriented architecture.",
+      "highlights": [
+        "Migrated a monolith to services without downtime",
+        "Reduced deployment time from 40 minutes to 6 minutes"
+      ],
+      "keywords": ["Java", "Kubernetes", "gRPC"],
+      "x-cv": { "sourceId": "work-initech-2022" }
+    },
+    {
+      "name": "Acme Robotics",
+      "location": "Munich, Germany",
+      "position": "Software Engineer",
+      "startDate": "2020-01",
+      "endDate": "2022-02",
+      "summary": "Built fleet-management software for warehouse robots.",
+      "highlights": [
+        "Implemented a real-time robot dispatch algorithm",
+        "Built a simulation harness that cut integration bugs in half"
+      ],
+      "keywords": ["Python", "ROS", "Redis"],
+      "x-cv": { "sourceId": "work-acme-2020" }
+    }
+  ],
+  "education": [
+    {
+      "institution": "Technical University of Munich",
+      "area": "Computer Science",
+      "studyType": "MSc",
+      "startDate": "2018",
+      "endDate": "2020",
+      "x-cv": { "sourceId": "education-tum-msc" }
+    },
+    {
+      "institution": "Universidad Complutense de Madrid",
+      "area": "Computer Engineering",
+      "studyType": "BSc",
+      "startDate": "2012",
+      "endDate": "2016",
+      "x-cv": { "sourceId": "education-ucm-bsc" }
+    }
+  ],
+  "skills": [
+    { "name": "Backend Engineering", "keywords": ["TypeScript", "PostgreSQL", "Kafka"] },
+    { "name": "Cloud & Platform", "keywords": ["AWS", "Kubernetes"] }
+  ],
+  "languages": [
+    {
+      "language": "Spanish",
+      "fluency": "C2",
+      "x-cv": { "sourceId": "language-spanish", "proficiency": { "framework": "CEFR", "level": "C2", "status": "native" } }
+    },
+    {
+      "language": "English",
+      "fluency": "C2",
+      "x-cv": { "sourceId": "language-english", "proficiency": { "framework": "CEFR", "level": "C2" } }
+    },
+    {
+      "language": "German",
+      "fluency": "C1",
+      "x-cv": { "sourceId": "language-german", "proficiency": { "framework": "CEFR", "level": "C1" } }
+    },
+    {
+      "language": "French",
+      "fluency": "B1",
+      "x-cv": { "sourceId": "language-french", "proficiency": { "framework": "CEFR", "level": "B1" } }
+    }
+  ],
+  "meta": {
+    "x-cv": {
+      "kind": "printable",
+      "language": "en",
+      "canonicalPath": "canonical-career.json",
+      "canonicalSha256": "0e5bfd54f6d4e31d823fcc8135773eb63d1582244034158a641331a2d36dc06e",
+      "useCase": "General-purpose two-page CV for senior backend engineering roles",
+      "targetJob": null,
+      "focus": "balanced",
+      "selectedWorkIds": ["work-globex-2025", "work-initech-2022", "work-acme-2020"],
+      "omittedWorkIds": ["work-umbrella-2018", "work-stark-2016", "work-wayne-2014"]
+    }
+  },
+  "x-cv": {
+    "strengths": [
+      { "name": "Distributed Systems", "keywords": ["Event-driven architecture", "API performance", "Ledger design"] },
+      { "name": "Platform Reliability", "keywords": ["Kubernetes", "CI/CD", "On-call practice"] },
+      { "name": "Team Enablement", "keywords": ["Mentoring", "Contract testing", "Cross-team collaboration"] }
+    ],
+    "otherExperience": {
+      "count": 3,
+      "totalCareerEntries": 6,
+      "dateRange": "2013 - 2019",
+      "highlightedWorkIds": ["work-umbrella-2018", "work-stark-2016", "work-wayne-2014"],
+      "highlightedNames": ["Umbrella Analytics", "Stark Industries Labs", "Wayne Foundation"],
+      "summary": "Earlier roles spanned analytics tooling, embedded firmware, and IT support across Spain and remote teams."
+    }
+  }
+}
