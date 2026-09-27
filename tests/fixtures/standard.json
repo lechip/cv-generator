@@ -1,0 +1,24 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/master/schema.json",
+  "basics": {
+    "name": "Alex Example",
+    "label": "Software Engineer",
+    "email": "alex@example.test",
+    "summary": "Builds dependable software systems.",
+    "location": { "city": "Berlin", "countryCode": "DE" },
+    "profiles": [{ "network": "Portfolio", "url": "https://example.test" }]
+  },
+  "work": [
+    {
+      "name": "Example Systems",
+      "position": "Senior Engineer",
+      "startDate": "2022-01",
+      "endDate": "2024-06",
+      "summary": "Delivered a portable platform.",
+      "highlights": ["Designed APIs", "Supported colleagues"]
+    }
+  ],
+  "education": [{ "institution": "Example University", "studyType": "MSc", "area": "Computer Science" }],
+  "skills": [{ "name": "Engineering", "keywords": ["TypeScript", "APIs"] }],
+  "languages": [{ "language": "English", "fluency": "Professional" }]
+}
