@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Guard against committed real profile data
+        run: |
+          tracked=$(git ls-files profiles | grep -v '^profiles/example/' || true)
+          if [ -n "$tracked" ]; then
+            echo "Only profiles/example/ may be committed under profiles/:" >&2
+            echo "$tracked" >&2
+            exit 1
+          fi
+      - run: pnpm build
+      - run: pnpm test
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:pdf

@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.local/cv-generator/canonical.schema.json",
+  "title": "Canonical JSON Resume",
+  "allOf": [{ "$ref": "http://example.com/example.json" }],
+  "type": "object",
+  "required": ["basics", "work", "education", "skills", "languages", "meta"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["x-cv"],
+      "properties": {
+        "x-cv": {
+          "type": "object",
+          "required": ["kind", "source"],
+          "properties": {
+            "kind": { "const": "canonical" },
+            "language": { "type": "string", "minLength": 2 },
+            "source": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+    "work": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "position", "startDate", "x-cv"],
+        "properties": {
+          "x-cv": {
+            "type": "object",
+            "required": ["id"],
+            "properties": { "id": { "type": "string", "minLength": 1 } }
+          }
+        }
+      }
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["language", "fluency", "x-cv"],
+        "properties": {
+          "x-cv": {
+            "type": "object",
+            "required": ["id", "proficiency"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "proficiency": { "$ref": "#/definitions/cefrProficiency" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "cefrProficiency": {
+      "type": "object",
+      "required": ["framework", "level"],
+      "properties": {
+        "framework": { "const": "CEFR" },
+        "level": { "enum": ["A1", "A2", "B1", "B2", "C1", "C2"] },
+        "status": { "enum": ["native", "bilingual"] }
+      },
+      "if": { "required": ["status"] },
+      "then": { "properties": { "level": { "const": "C2" } } }
+    }
+  }
+}

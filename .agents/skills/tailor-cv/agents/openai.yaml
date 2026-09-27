@@ -1,0 +1,4 @@
+interface:
+  display_name: "Tailor CV"
+  short_description: "Condense canonical career data for applications"
+  default_prompt: "Use $tailor-cv to create a balanced two-page printable JSON Resume for this job."
