@@ -20,3 +20,22 @@ test("tailor-cv skill exposes all focus scenarios and the JSON-only page-budget 
   const roles = skill.indexOf("Reduce detailed roles");
   assert.ok(removal < summary && summary < prose && prose < roles, "page-budget revisions must remain ordered");
 });
+
+test("tailor-cv skill runs ats-check between validation and build and documents the ATS rules", async () => {
+  const skill = await readFile(path.join(process.cwd(), ".agents/skills/tailor-cv/SKILL.md"), "utf8");
+  assert.match(skill, /pnpm cv ats-check <printable>/);
+  assert.match(skill, /## General CV/);
+  assert.match(skill, /## ATS and AI-screening rules/);
+  assert.match(skill, /action verb/);
+  assert.match(skill, /30 words/);
+  assert.match(skill, /basics\.label/);
+  assert.match(skill, /## Bullet writing/);
+  assert.match(skill, /### Concrete numbers/);
+  assert.match(skill, /Never estimate, round up, or add a number/);
+  assert.match(skill, /### Strong action verbs/);
+  assert.match(skill, /Swap weak openers/);
+  const validate = skill.indexOf("pnpm cv validate <printable>");
+  const atsCheck = skill.indexOf("pnpm cv ats-check <printable>");
+  const build = skill.indexOf("pnpm cv build <printable>");
+  assert.ok(validate < atsCheck && atsCheck < build, "ats-check must run after validation and before the build");
+});
