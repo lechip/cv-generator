@@ -18,6 +18,9 @@
 - Set `focus`, `useCase`, `targetJob`, `selectedWorkIds`, and `omittedWorkIds`.
 - Include only detailed jobs in `work`; give each one `x-cv.sourceId`.
 - Copy immutable work fields exactly: `name`, `location`, `position`, `url`, `startDate`, and `endDate`. Tailor only `summary`, `highlights`, and `keywords`.
+- Tailorable fields, and nothing else: `basics.label`, `basics.summary`, `work[].summary`, `work[].highlights`, `work[].keywords`, `x-cv.strengths`, `x-cv.otherExperience.summary`, and `skills`.
+- Always set `basics.label` to the title the CV is for; parsers and rankers read it as the candidate's role.
+- For a general CV (`meta.x-cv.targetJob` is `null`), every term in the canonical `work[].keywords` of the selected roles and in canonical `skills[].keywords` must appear in the printable text (Skills groups, bullets, or `work[].keywords`).
 - Give retained education and languages their canonical `x-cv.sourceId`; copy their factual fields exactly. For every language, copy `fluency` and the complete `x-cv.proficiency` object unchanged. Do not write human display labels into JSON; renderers derive those deterministically.
 - Put editorial strength groups in root `x-cv.strengths`.
 - Put the skill-written condensed section in root `x-cv.otherExperience` with:
@@ -31,3 +34,7 @@
 ## Renderer Boundary
 
 The renderer may format dates and sections. It must not rank, select, omit, shorten, rewrite, or synthesize resume content. A page-budget failure is feedback to revise printable JSON.
+
+## ATS Diagnostics
+
+`pnpm cv ats-check <printable> [--job <file>]` renders the PDF, reads its text back like an applicant tracking system, and reports findings in three layers: parse (reading order, headings, contact block, dates), content (bullet writing, generated-sounding words, canonical keyword coverage), and job (keyword match and title alignment against a job description). It never edits data. ERROR findings fail the command; the skill clears ERROR and WARN findings by revising printable JSON.

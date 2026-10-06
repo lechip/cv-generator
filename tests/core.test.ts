@@ -10,8 +10,9 @@ import { languageDisplayFluency, languageProficiencyRank, sortLanguages } from "
 import { defaultOutputBaseName, filenamePersonName, formatGenerationDate, resumeLanguageCode } from "../src/core/naming.js";
 import { DEFAULT_OUTPUT_DIRECTORY } from "../src/core/output.js";
 import { validateResumeFile } from "../src/core/validate.js";
-import { renderHtml } from "../src/renderers/html.js";
+import { getTheme, renderHtml } from "../src/renderers/html.js";
 import { renderMarkdown } from "../src/renderers/markdown.js";
+import { renderText } from "../src/renderers/text.js";
 import type { Resume } from "../src/types.js";
 
 const root = process.cwd();
@@ -28,12 +29,12 @@ test("canonical profile validates and preserves the full career inventory", asyn
   assert.equal(resume.awards?.length, 1);
 });
 
-test("replaceable printable profile reconciles three detailed and three condensed roles", async () => {
+test("replaceable printable profile reconciles four detailed and two condensed roles", async () => {
   const result = await validateResumeFile(printablePath);
   const resume = await readResume(printablePath);
   assert.equal(result.valid, true, result.errors.join("\n"));
-  assert.equal(resume.work?.length, 3);
-  assert.equal(resume["x-cv"]?.otherExperience?.count, 3);
+  assert.equal(resume.work?.length, 4);
+  assert.equal(resume["x-cv"]?.otherExperience?.count, 2);
   assert.equal(resume["x-cv"]?.otherExperience?.totalCareerEntries, 6);
 });
 
@@ -179,9 +180,8 @@ test("every CEFR level and bilingual status has a stable display label", () => {
 
 test("all renderers use the shared language proficiency ordering", async () => {
   const resume = await readResume(printablePath);
-  const html = renderHtml(resume, "modern-europass");
-  const markdown = renderMarkdown(resume);
-  for (const output of [html, markdown]) {
+  const outputs = [renderHtml(resume, "modern-europass"), renderHtml(resume, "ats"), renderMarkdown(resume), renderText(resume)];
+  for (const output of outputs) {
     const offsets = ["Spanish", "English", "German", "French"].map((language) => output.lastIndexOf(language));
     assert.ok(offsets.every((offset) => offset >= 0));
     assert.ok(offsets.every((offset, index) => index === 0 || offsets[index - 1]! < offset));
@@ -193,18 +193,29 @@ test("all renderers use the shared language proficiency ordering", async () => {
 
 test("renderers reproduce every supplied work entry without selecting content", async () => {
   const resume = await readResume(canonicalPath);
-  const html = renderHtml(resume, "modern-europass");
-  const markdown = renderMarkdown(resume);
+  const outputs = [renderHtml(resume, "modern-europass"), renderHtml(resume, "ats"), renderMarkdown(resume), renderText(resume)];
   for (const work of resume.work ?? []) {
-    assert.match(html, new RegExp(work.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
-    assert.match(markdown, new RegExp(work.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    for (const output of outputs) assert.match(output, new RegExp(work.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
 });
 
-test("semantic HTML and Markdown snapshots remain stable", async () => {
+test("semantic HTML, Markdown and plain-text snapshots remain stable", async () => {
   const resume = await readResume(path.join(root, "tests/fixtures/standard.json"));
-  const markdown = renderMarkdown(resume);
-  const html = renderHtml(resume, "modern-europass").replace(/<style>[\s\S]*<\/style>/, "<style>[theme-css]</style>");
-  assert.equal(markdown, await readFile(path.join(root, "tests/snapshots/standard.md"), "utf8"));
-  assert.equal(html, (await readFile(path.join(root, "tests/snapshots/standard.html"), "utf8")).trimEnd());
+  const maskCss = (html: string) => html.replace(/<style>[\s\S]*<\/style>/, "<style>[theme-css]</style>");
+  assert.equal(renderMarkdown(resume), await readFile(path.join(root, "tests/snapshots/standard.md"), "utf8"));
+  assert.equal(renderText(resume), await readFile(path.join(root, "tests/snapshots/standard.txt"), "utf8"));
+  assert.equal(maskCss(renderHtml(resume, "modern-europass")), (await readFile(path.join(root, "tests/snapshots/standard.html"), "utf8")).trimEnd());
+  assert.equal(maskCss(renderHtml(resume, "ats")), (await readFile(path.join(root, "tests/snapshots/standard.ats.html"), "utf8")).trimEnd());
+});
+
+test("the ats theme prints every contact item, the title line and standard headings", async () => {
+  const resume = await readResume(printablePath);
+  const html = renderHtml(resume, "ats");
+  assert.match(html, /<h1 class="name">Alex Example<\/h1>/);
+  assert.match(html, /<p class="label">Senior Backend Engineer<\/p>/);
+  assert.match(html, /linkedin\.com\/in\/alex-example/);
+  assert.match(html, /alex-example\.test/);
+  for (const heading of getTheme("ats").sectionHeadings(resume)) assert.match(html, new RegExp(`<h2 class="section-title">${heading}</h2>`));
+  assert.doesNotMatch(html, /<table/);
+  assert.doesNotMatch(html, /grid-template-columns/);
 });

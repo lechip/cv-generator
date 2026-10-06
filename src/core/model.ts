@@ -85,3 +85,31 @@ export function createViewModel(resume: Resume): ViewModel {
     printable: resume.meta?.["x-cv"]?.kind === "printable",
   };
 }
+
+/** "City, Region, CC" without duplicates; shared by every renderer so text checks see one spelling. */
+export function locationText(location?: Record<string, string>): string {
+  if (!location) return "";
+  const parts = [location.city, location.region, location.countryCode].filter(Boolean) as string[];
+  return [...new Set(parts)].join(", ");
+}
+
+/** Human-readable URL text: drop the scheme, "www." and a trailing slash. */
+export function displayUrl(url?: string): string {
+  return (url ?? "").replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/$/, "");
+}
+
+/** Contact items in the order the single-column theme and the text renderer print them. */
+export function contactItems(resume: Resume): Array<{ kind: "location" | "phone" | "email" | "profile" | "url"; text: string; href?: string }> {
+  const basics = resume.basics ?? {};
+  const items: Array<{ kind: "location" | "phone" | "email" | "profile" | "url"; text: string; href?: string }> = [];
+  const location = locationText(basics.location);
+  if (location) items.push({ kind: "location", text: location });
+  if (basics.phone) items.push({ kind: "phone", text: basics.phone });
+  if (basics.email) items.push({ kind: "email", text: basics.email, href: `mailto:${basics.email}` });
+  for (const profile of basics.profiles ?? []) {
+    if (profile.url) items.push({ kind: "profile", text: displayUrl(profile.url), href: profile.url });
+  }
+  // basics.url often repeats the LinkedIn profile; print each address once.
+  if (basics.url && !items.some((item) => item.text === displayUrl(basics.url))) items.push({ kind: "url", text: displayUrl(basics.url), href: basics.url });
+  return items;
+}

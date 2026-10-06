@@ -1,0 +1,18 @@
+Senior Backend Engineer (m/f/d) - Payments Platform
+
+About the role
+We are looking for a Senior Backend Engineer to own the services behind our payments platform. You will design event-driven systems, operate them in production and mentor other engineers.
+
+Responsibilities
+- Design and build backend services in TypeScript and Node.js on AWS
+- Model data in PostgreSQL and stream events through Kafka
+- Improve API latency and reliability; own on-call for your services
+- Drive contract testing and CI/CD practices across teams
+- Mentor engineers and review code
+
+Requirements
+- 5+ years of backend experience with TypeScript or Java
+- Strong PostgreSQL and SQL skills
+- Experience with Kafka, Kubernetes and Terraform
+- Familiarity with Datadog or Grafana for observability
+- Fluent English; German is a plus
