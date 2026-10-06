@@ -7,7 +7,7 @@ import { readResume, resumeKind } from "./core/files.js";
 import { defaultOutputBaseName, resumeLanguageCode } from "./core/naming.js";
 import { DEFAULT_OUTPUT_DIRECTORY } from "./core/output.js";
 import { assertValid, validateResumeFile } from "./core/validate.js";
-import { renderHtml } from "./renderers/html.js";
+import { DEFAULT_THEME, getTheme, renderHtml } from "./renderers/html.js";
 import { renderMarkdown } from "./renderers/markdown.js";
 import { renderPdf } from "./renderers/pdf.js";
 import { renderOdt } from "./renderers/odt.js";
@@ -61,7 +61,7 @@ program.command("validate")
 program.command("build")
   .argument("<resume>", "Path to JSON Resume")
   .option("-f, --formats <formats>", "Comma-separated: pdf,html,markdown,odt", "pdf")
-  .option("-t, --theme <theme>", "Theme name", "modern-europass")
+  .option("-t, --theme <theme>", "Theme name: ats (single column, default) or modern-europass", DEFAULT_THEME)
   .option("-o, --out <directory>", "Output directory", DEFAULT_OUTPUT_DIRECTORY)
   .action(async (resumePath: string, options: { formats: string; theme: string; out: string }) => {
     const validation = await validateResumeFile(resumePath);
@@ -74,7 +74,8 @@ program.command("build")
     const outputDirectory = path.resolve(options.out);
     await mkdir(outputDirectory, { recursive: true });
     const base = defaultOutputBaseName(resume);
-    const html = renderHtml(resume, options.theme);
+    const theme = getTheme(options.theme);
+    const html = theme.render(resume);
     const markdown = renderMarkdown(resume);
 
     if (formats.includes("html")) {
@@ -89,7 +90,7 @@ program.command("build")
     }
     if (formats.includes("pdf")) {
       const output = path.join(outputDirectory, `${base}.pdf`);
-      const pageCount = await renderPdf(html, output);
+      const pageCount = await renderPdf(html, output, theme.pdf);
       console.log(`pdf: ${output} (${pageCount} page${pageCount === 1 ? "" : "s"})`);
       if (resumeKind(resume) === "printable" && pageCount > 2) {
         throw new Error(`Printable PDF exceeds the two-page budget: ${pageCount} pages. Revise printable JSON; the renderer will not shrink or remove content.`);
@@ -104,7 +105,7 @@ program.command("build")
 
 program.command("inspect")
   .argument("<resume>", "Path to JSON Resume")
-  .option("-t, --theme <theme>", "Theme name", "modern-europass")
+  .option("-t, --theme <theme>", "Theme name: ats (single column, default) or modern-europass", DEFAULT_THEME)
   .action(async (resumePath: string, options: { theme: string }) => {
     const validation = await validateResumeFile(resumePath);
     printValidation(validation, resumePath);
@@ -120,7 +121,7 @@ program.command("inspect")
       const scratch = await mkdtemp(path.join(tmpdir(), "cv-generator-inspect-"));
       try {
         const pdfPath = path.join(scratch, "inspect.pdf");
-        const pages = await renderPdf(renderHtml(resume, options.theme), pdfPath);
+        const pages = await renderPdf(renderHtml(resume, options.theme), pdfPath, getTheme(options.theme).pdf);
         console.log(`page budget: ${pages}/2 ${pages <= 2 ? "PASS" : "FAIL"}`);
         if (pages > 2) process.exitCode = 1;
       } finally {

@@ -99,7 +99,7 @@
     {
       "institution": "Technical University of Munich",
       "area": "Computer Science",
-      "studyType": "MSc",
+      "studyType": "Master of Science (MSc)",
       "startDate": "2018",
       "endDate": "2020",
       "x-cv": { "id": "education-tum-msc" }
@@ -107,7 +107,7 @@
     {
       "institution": "Universidad Complutense de Madrid",
       "area": "Computer Engineering",
-      "studyType": "BSc",
+      "studyType": "Bachelor of Science (BSc)",
       "startDate": "2012",
       "endDate": "2016",
       "x-cv": { "id": "education-ucm-bsc" }
