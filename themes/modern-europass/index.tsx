@@ -1,10 +1,26 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { formatRange } from "../../src/core/dates.js";
-import { createViewModel, languageDisplayFluency } from "../../src/core/model.js";
+import { formatMonth, formatRange } from "../../src/core/dates.js";
+import { createViewModel, languageDisplayFluency, locationText } from "../../src/core/model.js";
 import { resumeLanguageCode } from "../../src/core/naming.js";
 import type { EducationEntry, Resume, WorkEntry } from "../../src/types.js";
+import type { PdfRenderOptions } from "../../src/renderers/pdf.js";
 import { styles } from "./styles.js";
+
+/** Europass look keeps its "Page X / Y" footer. */
+export const pdf: PdfRenderOptions = { footer: true };
+
+/** Ordered headings this theme prints for the given resume. */
+export function sectionHeadings(resume: Resume): string[] {
+  const headings = ["Personal information"];
+  if (resume.basics?.summary) headings.push("Summary");
+  if (resume["x-cv"]?.strengths?.length || resume.skills?.length) headings.push("Skills");
+  if (resume.work?.length) headings.push("Work experience");
+  if (resume["x-cv"]?.otherExperience) headings.push("Other experience");
+  if (resume.education?.length) headings.push("Education");
+  if (resume.languages?.length) headings.push("Languages");
+  return headings;
+}
 
 function Section({ title, children, className = "" }: React.PropsWithChildren<{ title: string; className?: string }>) {
   return <section className={`section ${className}`.trim()}>
@@ -13,15 +29,15 @@ function Section({ title, children, className = "" }: React.PropsWithChildren<{ 
   </section>;
 }
 
-function locationText(location?: Record<string, string>): string {
-  if (!location) return "";
-  const parts = [location.city, location.region, location.countryCode].filter(Boolean);
-  return [...new Set(parts)].join(", ");
+function Keywords({ keywords }: { keywords: string[] }) {
+  return <>{keywords.map((keyword, index) => <React.Fragment key={`${keyword}-${index}`}>
+    {index > 0 ? ", " : ""}<span className="nowrap">{keyword}</span>
+  </React.Fragment>)}</>;
 }
 
 function Work({ entry }: { entry: WorkEntry }) {
   return <article className="experience-entry">
-    <div className="experience-date">{formatRange(entry.startDate, entry.endDate)}</div>
+    <div className="experience-date"><span className="nowrap">{formatMonth(entry.startDate)}</span> - <span className="nowrap">{entry.endDate ? formatMonth(entry.endDate) : "Present"}</span></div>
     <div>
       <header className="experience-heading">
         <div className="experience-company">{entry.url ? <a href={entry.url}>{entry.name}</a> : entry.name}</div>
@@ -35,9 +51,10 @@ function Work({ entry }: { entry: WorkEntry }) {
 
 function Education({ entry }: { entry: EducationEntry }) {
   const degree = [entry.studyType, entry.area].filter(Boolean).join(" ");
+  const dates = entry.startDate ? formatRange(entry.startDate, entry.endDate) : "";
   return <div className="education-entry">
     <div className="education-degree">{degree || entry.institution}</div>
-    <div className="education-school">{entry.institution}</div>
+    <div className="education-school">{entry.institution}{dates ? <> | <span className="nowrap">{dates}</span></> : null}</div>
   </div>;
 }
 
@@ -52,6 +69,7 @@ function ResumeDocument({ resume }: { resume: Resume }) {
 
     <Section title="Personal information">
       <p className="contact-line">{basics.name}</p>
+      {basics.label ? <p className="contact-line">{basics.label}</p> : null}
       {contactLocation ? <p className="contact-line"><span className="contact-label">Location</span>{contactLocation}</p> : null}
       {basics.phone ? <p className="contact-line"><span className="contact-label">Telephone</span>{basics.phone}</p> : null}
       {basics.email ? <p className="contact-line"><span className="contact-label">Email</span><a href={`mailto:${basics.email}`}>{basics.email}</a></p> : null}
@@ -60,12 +78,12 @@ function ResumeDocument({ resume }: { resume: Resume }) {
 
     {basics.summary ? <Section title="Summary"><p className="summary">{basics.summary}</p></Section> : null}
 
-    {model.strengths.length ? <Section title="Strengths">
+    {model.strengths.length ? <Section title="Skills">
       {model.strengths.map((strength) => <p className="strength" key={strength.name}>
-        <span className="strength-name">{strength.name}: </span>{strength.keywords.join(", ")}
+        <span className="strength-name">{strength.name}: </span><Keywords keywords={strength.keywords} />
       </p>)}
-    </Section> : resume.skills?.length ? <Section title="Skillset">
-      <ul className="standard-skills">{resume.skills.map((skill) => <li key={skill.name}><strong>{skill.name}:</strong> {(skill.keywords ?? []).join(", ")}</li>)}</ul>
+    </Section> : resume.skills?.length ? <Section title="Skills">
+      <ul className="standard-skills">{resume.skills.map((skill) => <li key={skill.name}><strong>{skill.name}:</strong> <Keywords keywords={skill.keywords ?? []} /></li>)}</ul>
     </Section> : null}
 
     {resume.work?.length ? <section aria-labelledby="work-heading">
@@ -103,4 +121,4 @@ export function render(resume: Resume): string {
   return `<!doctype html><html lang="${language}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="${escapedTitle}"><title>${escapedTitle}</title><style>${styles}</style></head><body>${markup}</body></html>`;
 }
 
-export default { render };
+export default { render, pdf, sectionHeadings };

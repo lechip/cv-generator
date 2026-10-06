@@ -1,11 +1,6 @@
 import type { Resume } from "../types.js";
 import { formatRange } from "../core/dates.js";
-import { languageDisplayFluency, sortLanguages } from "../core/model.js";
-
-function locationText(location?: Record<string, string>): string {
-  if (!location) return "";
-  return [...new Set([location.city, location.region, location.countryCode].filter(Boolean))].join(", ");
-}
+import { languageDisplayFluency, locationText, sortLanguages } from "../core/model.js";
 
 export function renderMarkdown(resume: Resume): string {
   const lines: string[] = [];
@@ -18,7 +13,7 @@ export function renderMarkdown(resume: Resume): string {
 
   const strengths = resume["x-cv"]?.strengths;
   if (strengths?.length) {
-    lines.push("## Strengths", "");
+    lines.push("## Skills", "");
     for (const strength of strengths) lines.push(`- **${strength.name}:** ${strength.keywords.join(", ")}`);
     lines.push("");
   } else if (resume.skills?.length) {

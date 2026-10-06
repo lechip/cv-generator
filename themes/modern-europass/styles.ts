@@ -29,8 +29,11 @@ export const styles = `${fontCss}
   background: #f3f5f7;
   font-size: 10pt;
   line-height: 1.18;
+  -webkit-hyphens: none;
+  hyphens: none;
 }
 * { box-sizing: border-box; }
+.nowrap { white-space: nowrap; }
 body { margin: 0; background: inherit; }
 a { color: var(--accent); text-decoration: none; }
 .resume {
