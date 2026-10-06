@@ -10,6 +10,7 @@ import { assertValid, validateResumeFile } from "./core/validate.js";
 import { DEFAULT_THEME, getTheme, renderHtml } from "./renderers/html.js";
 import { renderMarkdown } from "./renderers/markdown.js";
 import { renderPdf } from "./renderers/pdf.js";
+import { renderText } from "./renderers/text.js";
 import { renderOdt } from "./renderers/odt.js";
 
 const program = new Command();
@@ -60,7 +61,7 @@ program.command("validate")
 
 program.command("build")
   .argument("<resume>", "Path to JSON Resume")
-  .option("-f, --formats <formats>", "Comma-separated: pdf,html,markdown,odt", "pdf")
+  .option("-f, --formats <formats>", "Comma-separated: pdf,html,markdown,txt,odt", "pdf")
   .option("-t, --theme <theme>", "Theme name: ats (single column, default) or modern-europass", DEFAULT_THEME)
   .option("-o, --out <directory>", "Output directory", DEFAULT_OUTPUT_DIRECTORY)
   .action(async (resumePath: string, options: { formats: string; theme: string; out: string }) => {
@@ -68,7 +69,7 @@ program.command("build")
     assertValid(validation, resumePath);
     const resume = await readResume(resumePath);
     const formats = [...new Set(options.formats.split(",").map((format) => format.trim().toLowerCase()).filter(Boolean))];
-    const supported = new Set(["pdf", "html", "markdown", "md", "odt"]);
+    const supported = new Set(["pdf", "html", "markdown", "md", "txt", "odt"]);
     for (const format of formats) if (!supported.has(format)) throw new Error(`Unsupported format: ${format}`);
 
     const outputDirectory = path.resolve(options.out);
@@ -87,6 +88,11 @@ program.command("build")
       const output = path.join(outputDirectory, `${base}.md`);
       await writeFile(output, markdown, "utf8");
       console.log(`markdown: ${output}`);
+    }
+    if (formats.includes("txt")) {
+      const output = path.join(outputDirectory, `${base}.txt`);
+      await writeFile(output, renderText(resume), "utf8");
+      console.log(`txt: ${output}`);
     }
     if (formats.includes("pdf")) {
       const output = path.join(outputDirectory, `${base}.pdf`);

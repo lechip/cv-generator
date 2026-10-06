@@ -12,6 +12,7 @@ import { DEFAULT_OUTPUT_DIRECTORY } from "../src/core/output.js";
 import { validateResumeFile } from "../src/core/validate.js";
 import { getTheme, renderHtml } from "../src/renderers/html.js";
 import { renderMarkdown } from "../src/renderers/markdown.js";
+import { renderText } from "../src/renderers/text.js";
 import type { Resume } from "../src/types.js";
 
 const root = process.cwd();
@@ -179,7 +180,7 @@ test("every CEFR level and bilingual status has a stable display label", () => {
 
 test("all renderers use the shared language proficiency ordering", async () => {
   const resume = await readResume(printablePath);
-  const outputs = [renderHtml(resume, "modern-europass"), renderHtml(resume, "ats"), renderMarkdown(resume)];
+  const outputs = [renderHtml(resume, "modern-europass"), renderHtml(resume, "ats"), renderMarkdown(resume), renderText(resume)];
   for (const output of outputs) {
     const offsets = ["Spanish", "English", "German", "French"].map((language) => output.lastIndexOf(language));
     assert.ok(offsets.every((offset) => offset >= 0));
@@ -192,16 +193,17 @@ test("all renderers use the shared language proficiency ordering", async () => {
 
 test("renderers reproduce every supplied work entry without selecting content", async () => {
   const resume = await readResume(canonicalPath);
-  const outputs = [renderHtml(resume, "modern-europass"), renderHtml(resume, "ats"), renderMarkdown(resume)];
+  const outputs = [renderHtml(resume, "modern-europass"), renderHtml(resume, "ats"), renderMarkdown(resume), renderText(resume)];
   for (const work of resume.work ?? []) {
     for (const output of outputs) assert.match(output, new RegExp(work.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
 });
 
-test("semantic HTML and Markdown snapshots remain stable", async () => {
+test("semantic HTML, Markdown and plain-text snapshots remain stable", async () => {
   const resume = await readResume(path.join(root, "tests/fixtures/standard.json"));
   const maskCss = (html: string) => html.replace(/<style>[\s\S]*<\/style>/, "<style>[theme-css]</style>");
   assert.equal(renderMarkdown(resume), await readFile(path.join(root, "tests/snapshots/standard.md"), "utf8"));
+  assert.equal(renderText(resume), await readFile(path.join(root, "tests/snapshots/standard.txt"), "utf8"));
   assert.equal(maskCss(renderHtml(resume, "modern-europass")), (await readFile(path.join(root, "tests/snapshots/standard.html"), "utf8")).trimEnd());
   assert.equal(maskCss(renderHtml(resume, "ats")), (await readFile(path.join(root, "tests/snapshots/standard.ats.html"), "utf8")).trimEnd());
 });

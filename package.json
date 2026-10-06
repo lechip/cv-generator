@@ -23,7 +23,8 @@
     "test:pdf": "RUN_PDF_TESTS=1 node --import tsx --test tests/pdf.test.ts",
     "test:odt": "RUN_ODT_TESTS=1 node --import tsx --test tests/odt.test.ts",
     "check": "pnpm build && pnpm test",
-    "fonts": "node scripts/embed-fonts.ts"
+    "fonts": "node scripts/embed-fonts.ts",
+    "snapshots:update": "node --import tsx scripts/update-snapshots.ts"
   },
   "dependencies": {
     "@fontsource/noto-sans": "^5.3.0",
