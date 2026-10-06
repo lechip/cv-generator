@@ -1,9 +1,10 @@
 #!/usr/bin/env node
-import { access, copyFile, mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
+import { access, copyFile, mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { Command } from "commander";
-import { readResume, resumeKind } from "./core/files.js";
+import { formatReport, runAtsCheck } from "./core/ats/index.js";
+import { readResume, resolveCanonicalPath, resumeKind } from "./core/files.js";
 import { defaultOutputBaseName, resumeLanguageCode } from "./core/naming.js";
 import { DEFAULT_OUTPUT_DIRECTORY } from "./core/output.js";
 import { assertValid, validateResumeFile } from "./core/validate.js";
@@ -133,6 +134,47 @@ program.command("inspect")
       } finally {
         await rm(scratch, { recursive: true, force: true });
       }
+    }
+  });
+
+program.command("ats-check")
+  .description("Render the CV, read the PDF text back like an applicant tracking system, and report parse, writing and keyword findings. Read-only.")
+  .argument("<resume>", "Path to canonical or printable JSON Resume")
+  .option("-j, --job <file>", "Job description text file to match keywords against")
+  .option("-t, --theme <theme>", "Theme name: ats (single column, default) or modern-europass", DEFAULT_THEME)
+  .option("--pdf <file>", "Check this existing PDF instead of rendering a temporary one")
+  .option("--json", "Print the report as JSON", false)
+  .action(async (resumePath: string, options: { job?: string; theme: string; pdf?: string; json: boolean }) => {
+    const validation = await validateResumeFile(resumePath);
+    if (!options.json) printValidation(validation, resumePath);
+    assertValid(validation, resumePath);
+    const resume = await readResume(resumePath);
+    const theme = getTheme(options.theme);
+    const html = theme.render(resume);
+    const canonicalPath = resumeKind(resume) === "printable" ? resolveCanonicalPath(resumePath, resume) : undefined;
+    const canonical = canonicalPath ? await readResume(canonicalPath) : undefined;
+    const jobText = options.job ? await readFile(path.resolve(options.job), "utf8") : undefined;
+
+    const scratch = await mkdtemp(path.join(tmpdir(), "cv-generator-ats-"));
+    try {
+      let pdfPath = options.pdf ? path.resolve(options.pdf) : path.join(scratch, "ats-check.pdf");
+      if (!options.pdf) await renderPdf(html, pdfPath, theme.pdf);
+      const bytes = new Uint8Array(await readFile(pdfPath));
+      const report = await runAtsCheck({
+        resumePath: path.resolve(resumePath),
+        resume,
+        canonical,
+        theme: options.theme,
+        html,
+        expectedHeadings: theme.sectionHeadings(resume),
+        pdf: { bytes, fileName: options.pdf ? path.basename(pdfPath) : undefined, path: options.pdf ? pdfPath : undefined },
+        jobText,
+      });
+      if (options.json) console.log(JSON.stringify(report, null, 2));
+      else process.stdout.write(formatReport(report));
+      if (!report.ok) process.exitCode = 1;
+    } finally {
+      await rm(scratch, { recursive: true, force: true });
     }
   });
 
