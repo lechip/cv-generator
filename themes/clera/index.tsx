@@ -7,6 +7,7 @@ import { buildLayout, sectionHeadings, type Entry, type Run } from "./layout.js"
 import { styles } from "./styles.js";
 
 export { buildLayout, sectionHeadings } from "./layout.js";
+export { renderDocx as docx } from "./docx.js";
 
 /** Same print contract as `ats`: no footer text in the reading flow, untagged so strict parsers keep spaces. */
 export const pdf: PdfRenderOptions = { footer: false, tagged: false };

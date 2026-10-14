@@ -11,6 +11,8 @@ export interface Theme {
   pdf: PdfRenderOptions;
   /** Ordered section headings the theme emits for this resume. `ats-check` expects each on its own line. */
   sectionHeadings(resume: Resume): string[];
+  /** Optional Word layout: the .docx package parts, keyed by path inside the zip. */
+  docx?(resume: Resume): Array<[string, string]>;
 }
 
 /** Single-column theme that parses cleanly on applicant tracking systems. */
@@ -18,7 +20,7 @@ export const DEFAULT_THEME = "ats";
 
 const themes: Record<string, Theme> = {
   ats: { render: ats.render, pdf: ats.pdf, sectionHeadings: ats.sectionHeadings },
-  clera: { render: clera.render, pdf: clera.pdf, sectionHeadings: clera.sectionHeadings },
+  clera: { render: clera.render, pdf: clera.pdf, sectionHeadings: clera.sectionHeadings, docx: clera.docx },
   "modern-europass": { render: modernEuropass.render, pdf: modernEuropass.pdf, sectionHeadings: modernEuropass.sectionHeadings },
 };
 

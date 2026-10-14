@@ -2,7 +2,7 @@
   "name": "data-driven-cv-generator",
   "version": "0.1.0",
   "type": "module",
-  "description": "Data-driven JSON Resume tooling with deterministic PDF, HTML, Markdown, and ODT output.",
+  "description": "Data-driven JSON Resume tooling with deterministic PDF, HTML, Markdown, ODT, and DOCX output.",
   "license": "MIT",
   "author": "Oscar Barrios",
   "repository": {

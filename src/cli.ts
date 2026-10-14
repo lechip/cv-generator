@@ -8,11 +8,12 @@ import { readResume, resolveCanonicalPath, resumeKind } from "./core/files.js";
 import { defaultOutputBaseName, resumeLanguageCode } from "./core/naming.js";
 import { DEFAULT_OUTPUT_DIRECTORY } from "./core/output.js";
 import { assertValid, validateResumeFile } from "./core/validate.js";
-import { DEFAULT_THEME, getTheme, renderHtml } from "./renderers/html.js";
+import { DEFAULT_THEME, getTheme, renderHtml, themeNames } from "./renderers/html.js";
 import { renderMarkdown } from "./renderers/markdown.js";
 import { renderPdf } from "./renderers/pdf.js";
 import { renderText } from "./renderers/text.js";
 import { renderOdt } from "./renderers/odt.js";
+import { writeDocx } from "./renderers/docx.js";
 
 const program = new Command();
 program.name("cv").description("Validate and render JSON Resume profiles without editorial transformations.").version("0.1.0");
@@ -62,21 +63,24 @@ program.command("validate")
 
 program.command("build")
   .argument("<resume>", "Path to JSON Resume")
-  .option("-f, --formats <formats>", "Comma-separated: pdf,html,markdown,txt,odt", "pdf")
-  .option("-t, --theme <theme>", "Theme name: ats (single column, default) or modern-europass", DEFAULT_THEME)
+  .option("-f, --formats <formats>", "Comma-separated: pdf,html,markdown,txt,odt,docx", "pdf")
+  .option("-t, --theme <theme>", "Theme name: ats (single column, default), clera (Clera template, also docx) or modern-europass", DEFAULT_THEME)
   .option("-o, --out <directory>", "Output directory", DEFAULT_OUTPUT_DIRECTORY)
   .action(async (resumePath: string, options: { formats: string; theme: string; out: string }) => {
     const validation = await validateResumeFile(resumePath);
     assertValid(validation, resumePath);
     const resume = await readResume(resumePath);
     const formats = [...new Set(options.formats.split(",").map((format) => format.trim().toLowerCase()).filter(Boolean))];
-    const supported = new Set(["pdf", "html", "markdown", "md", "txt", "odt"]);
+    const supported = new Set(["pdf", "html", "markdown", "md", "txt", "odt", "docx"]);
     for (const format of formats) if (!supported.has(format)) throw new Error(`Unsupported format: ${format}`);
 
     const outputDirectory = path.resolve(options.out);
     await mkdir(outputDirectory, { recursive: true });
     const base = defaultOutputBaseName(resume);
     const theme = getTheme(options.theme);
+    if (formats.includes("docx") && !theme.docx) {
+      throw new Error(`Theme ${options.theme} has no Word layout. Use a theme with docx support: ${themeNames().filter((name) => getTheme(name).docx).join(", ")}.`);
+    }
     const html = theme.render(resume);
     const markdown = renderMarkdown(resume);
 
@@ -108,11 +112,16 @@ program.command("build")
       const engine = await renderOdt(markdown, html, output, path.resolve("themes", options.theme), resumeLanguageCode(resume));
       console.log(`odt: ${output} (${engine})`);
     }
+    if (formats.includes("docx") && theme.docx) {
+      const output = path.join(outputDirectory, `${base}.docx`);
+      await writeDocx(theme.docx(resume), output);
+      console.log(`docx: ${output}`);
+    }
   });
 
 program.command("inspect")
   .argument("<resume>", "Path to JSON Resume")
-  .option("-t, --theme <theme>", "Theme name: ats (single column, default) or modern-europass", DEFAULT_THEME)
+  .option("-t, --theme <theme>", "Theme name: ats (single column, default), clera (Clera template, also docx) or modern-europass", DEFAULT_THEME)
   .action(async (resumePath: string, options: { theme: string }) => {
     const validation = await validateResumeFile(resumePath);
     printValidation(validation, resumePath);
@@ -141,7 +150,7 @@ program.command("ats-check")
   .description("Render the CV, read the PDF text back like an applicant tracking system, and report parse, writing and keyword findings. Read-only.")
   .argument("<resume>", "Path to canonical or printable JSON Resume")
   .option("-j, --job <file>", "Job description text file to match keywords against")
-  .option("-t, --theme <theme>", "Theme name: ats (single column, default) or modern-europass", DEFAULT_THEME)
+  .option("-t, --theme <theme>", "Theme name: ats (single column, default), clera (Clera template, also docx) or modern-europass", DEFAULT_THEME)
   .option("--pdf <file>", "Check this existing PDF instead of rendering a temporary one")
   .option("--json", "Print the report as JSON", false)
   .action(async (resumePath: string, options: { job?: string; theme: string; pdf?: string; json: boolean }) => {
