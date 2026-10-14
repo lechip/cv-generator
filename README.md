@@ -1,6 +1,6 @@
 # Data-Driven CV Generator
 
-A portable TypeScript CLI that validates [JSON Resume](https://jsonresume.org/schema/) data and renders it deterministically as PDF, self-contained HTML, Markdown, or editable ODT.
+A portable TypeScript CLI that validates [JSON Resume](https://jsonresume.org/schema/) data and renders it deterministically as PDF, self-contained HTML, Markdown, editable ODT, or Word DOCX.
 
 The central rule is deliberately strict: the renderer never selects or ranks career evidence, shortens prose, or rewrites content. The repository's `tailor-cv` skill (works from Codex or Claude Code) performs all editorial work and emits a self-contained printable JSON file first.
 
@@ -9,7 +9,7 @@ canonical JSON
   -> tailor-cv skill (select, condense, rewrite with traceable evidence)
   -> printable JSON
   -> deterministic validation and rendering
-  -> PDF / HTML / Markdown / ODT
+  -> PDF / HTML / Markdown / ODT / DOCX
 ```
 
 ## Quickstart
@@ -173,6 +173,19 @@ odt: /path/to/cv-generator/output/2026-09-29-JaneExample-CV-en.odt (pandoc)
 
 The `txt` file holds one `Label: value` per line for portals that auto-fill a form from pasted text. Add `--theme modern-europass` when a person asked for the two-column Europass look.
 
+To get the layout of the Clera job-site template (`Clera_Resume_Template.docx`) as PDF and Word:
+
+```sh
+pnpm cv build profiles/jane/printable-career.json --theme clera --formats pdf,docx
+```
+
+```text
+pdf: /path/to/cv-generator/output/2026-09-29-JaneExample-CV-en.pdf (2 pages)
+docx: /path/to/cv-generator/output/2026-09-29-JaneExample-CV-en.docx
+```
+
+Use it to compare the two layouts in the same ATS testers (see [ATS testers](#ats-testers)). `docx` is only available with `--theme clera`.
+
 For the next application, return to step 4. Only the printable JSON and the rendered files change.
 
 ## ATS and AI screening
@@ -188,12 +201,31 @@ This repository answers both layers without moving editorial work into code:
 | --- | --- | --- |
 | `ats` theme (default) | Single column, name on line one, title line, contact line, standard headings, dates that never wrap, no footer, no icons, no tables, embedded fonts. | `themes/ats` |
 | `cv ats-check` | Renders the PDF, reads the text back, and reports parse, writing and keyword findings. Deterministic, offline, read-only. | `src/core/ats` |
+| `clera` theme and `docx` output | Copy of the Clera job-site template: centred header, bold employer line with right-aligned dates, bullets. PDF, HTML and an editable Word file from one shared layout. | `themes/clera`, `src/renderers/docx.ts` |
 | `txt` output | `Label: value` plain text for portal forms. | `src/renderers/text.ts` |
 | `tailor-cv` skill | General CV mode (every canonical skill covered, market-standard `basics.label`) and writing rules: action verbs, numbers, no duty phrasing, no generated-sounding vocabulary. | `.agents/skills/tailor-cv` |
 
-`ats-check` severities: ERROR means a parser would misread the document (fails the command), WARN means the skill should change the JSON, INFO is context. The two-column `modern-europass` theme fails `ats-check` by design; keep it for human readers.
+`ats-check` severities: ERROR means a parser would misread the document (fails the command), WARN means the skill should change the JSON, INFO is context. The two-column `modern-europass` theme fails `ats-check` by design; keep it for human readers. The `clera` theme reports `education-school-not-isolated` errors because the template prints the institution and the dates on one line; that is the template design, kept on purpose so you can compare it with `ats` in external testers.
 
-Cross-check the final PDF with free, browser-local tools when it matters: the [OpenResume parser](https://www.open-resume.com/resume-parser) shows what a Greenhouse or Lever style parser extracts, and [ats-screener](https://github.com/sunnypatell/ats-screener) simulates Workday, Taleo, iCIMS, Greenhouse, Lever and SuccessFactors scoring. Neither uploads your file. Paid matchers such as Jobscan, Resume Worded or Enhancv add job-specific keyword reports.
+### ATS testers
+
+`ats-check` is a heuristic. Cross-check the files in external testers before you decide which layout to send. Test the same printable JSON in every layout (`ats` PDF, `clera` PDF, `clera` DOCX) so only the format changes.
+
+| Tester | Type | Upload? | What it tells you |
+| --- | --- | --- | --- |
+| [ats-screener](https://github.com/sunnypatell/ats-screener) | Open source simulator | No, runs in the browser | Scores for Workday, Taleo, iCIMS, Greenhouse, Lever and SuccessFactors style parsers. |
+| [OpenResume parser](https://www.open-resume.com/resume-parser) | Open source parser | No, runs in the browser | The fields a Greenhouse or Lever style parser extracts from a PDF. PDF only. |
+| [Affinda resume parser](https://www.affinda.com/resume-parser) | Commercial parser demo | Yes | The structured fields of a parser that real ATS products embed. |
+| [Textkernel (Tx) demo](https://www.textkernel.com/) | Commercial parser demo | Yes | Same as above; Textkernel parsing is built into many European and US ATS products. |
+| [BeamJobs resume parser](https://www.beamjobs.com/resume-parser) | Free parser | Yes | Extracted sections and suggestions. |
+| [Jobscan](https://www.jobscan.co/), [Resume Worded](https://resumeworded.com/), [Enhancv ATS checker](https://enhancv.com/resources/resume-checker/) | Keyword matchers (freemium) | Yes | Job-specific keyword match scores. They rate content more than layout. |
+| The employer portal itself | Real ATS | Yes | Start an application on a Workday, Greenhouse or Lever posting and use "autofill from resume". The pre-filled fields show what that ATS read. This is the most reliable test. |
+
+Tips:
+
+- Read the extracted text, not only the score. Check name, email, phone, each employer, each title, each date range, and each school.
+- Tools that upload your file store your personal data on their servers. Use the browser-local tools first.
+- When a portal accepts both, many recruiters and job sites recommend DOCX, because most parsers were first built for Word files.
 
 ## `tailor-cv` skill reference
 
@@ -282,8 +314,8 @@ pnpm cv build <resume> [--formats <formats>] [--theme <theme>] [--out <directory
 | Parameter | Short form | Required | Default | Description |
 | --- | --- | --- | --- | --- |
 | `<resume>` | — | Yes | None | Path to any JSON Resume. The file is validated before rendering. |
-| `--formats <formats>` | `-f` | No | `pdf` | Comma-separated output list. Accepted values are `pdf`, `html`, `markdown`, `md`, `txt`, and `odt`; `md` is an alias for `markdown`. Repeated values are ignored. |
-| `--theme <theme>` | `-t` | No | `ats` | Registered theme name used for HTML and PDF and for the theme-owned ODT reference styles: `ats` (single column, parser-safe) or `modern-europass` (two-column Europass look). |
+| `--formats <formats>` | `-f` | No | `pdf` | Comma-separated output list. Accepted values are `pdf`, `html`, `markdown`, `md`, `txt`, `odt`, and `docx`; `md` is an alias for `markdown`. `docx` needs a theme with a Word layout (`clera`). Repeated values are ignored. |
+| `--theme <theme>` | `-t` | No | `ats` | Registered theme name used for HTML, PDF, DOCX and the theme-owned ODT reference styles: `ats` (single column, parser-safe), `clera` (Clera job-site template, also DOCX) or `modern-europass` (two-column Europass look). |
 | `--out <directory>` | `-o` | No | `output` | Destination directory for every requested format. Relative paths resolve from the current working directory, and the directory is created when missing. |
 
 Printable PDFs are limited to two pages. A longer result fails the build instead of changing content or styling.
@@ -408,7 +440,7 @@ Presentation is isolated under `themes/<name>`. A theme owns components, design 
 | `src/core` | Validation, freshness checks, immutable comparisons, and shared ordering/formatting |
 | `src/core/ats` | Read-only ATS diagnostics: PDF text extraction, parse, content and job-match analysers |
 | `src/renderers` | Deterministic HTML, PDF, Markdown, plain-text, and ODT orchestration |
-| `themes/<name>` | Replaceable visual presentation (`ats` default, `modern-europass`) and office reference styles |
+| `themes/<name>` | Replaceable visual presentation (`ats` default, `clera`, `modern-europass`) and office reference styles |
 | `output` | Default ignored destination for every generated document format |
 | `tests` | Contract, snapshot, page-budget, ATS diagnostics, ODT, and renderer-boundary verification |
 | `Dockerfile` | Pinned Node, Chromium, Pandoc, and LibreOffice environment |
@@ -426,15 +458,17 @@ Any conforming JSON Resume can use any output format. A canonical resume natural
 
 ## Themes and output engines
 
-Two themes implement JSON Resume's pure `render(resume)` convention and own only presentation:
+Three themes implement JSON Resume's pure `render(resume)` convention and own only presentation:
 
 - `themes/ats` (default): single-column, parser-safe layout with standard headings, no footer and no decoration. Use it for every upload.
+- `themes/clera`: copy of the Clera job-site template (`Clera_Resume_Template.docx`). Caladea (an open, metric-compatible copy of Cambria) is embedded in the PDF; the DOCX uses Cambria. Section order follows the template: Summary, Work Experience, Other Experience, Education, then Skills with the languages as the last bullet. It is the only theme that writes `docx`.
 - `themes/modern-europass`: two-column Europass look with React server-rendered components, print/screen CSS, design tokens, embedded Noto Sans fonts and the font license, plus an ODT reference document. Use it when a person wants the Europass style on paper or screen.
 
 - HTML is semantic, self-contained, and responsive.
 - PDF is printed from the same HTML as A4 with embedded fonts and links (tagged except for `ats`); `modern-europass` adds page numbers, `ats` does not.
 - Markdown is generated directly from the supplied JSON structure.
 - Plain text (`txt`) emits one `Label: value` per line for portal forms.
+- DOCX (`clera` only) is written directly as WordprocessingML from the same layout as the HTML: real Heading 1 section titles, a right tab stop for dates, Word bullets, and fixed zip timestamps so the same JSON gives the same bytes.
 - ODT passes through a Pandoc JSON AST when Pandoc is installed and uses the theme reference ODT; LibreOffice converts the self-contained HTML as a fallback.
 
 See [docs/architecture.md](docs/architecture.md) for extension points and invariants.

@@ -43,6 +43,8 @@ Summaries and highlights may be condensed by the skill, but the skill must be ab
 
 `ats` is the default. It is a single-column document: name on the first line, title line, contact line, then the standard headings Summary, Skills, Work Experience, Other Experience, Education, Certifications, Awards, Projects, Languages. It prints no page footer, no icons, no tables and no grid, so the PDF text layer reads top to bottom on strict parsers (Workday, Taleo, SAP SuccessFactors) as well as forgiving ones (Greenhouse, Lever).
 
+`clera` copies the Clera job-site template (`Clera_Resume_Template.docx`). `themes/clera/layout.ts` builds one layout that both the React HTML render and the WordprocessingML writer (`themes/clera/docx.ts`) print, so PDF and DOCX hold the same text. A theme that exports `docx(resume)` returns the package parts; `src/renderers/docx.ts` only zips them. `ats-check` reports `education-school-not-isolated` for it, because the template prints the institution and dates on one line.
+
 `modern-europass` keeps the two-column Europass look for people. Its label column merges with the content column in extracted text, so `ats-check` fails it by design; use it for human readers, not portal uploads.
 
 ## Adding a theme
