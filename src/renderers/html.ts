@@ -1,5 +1,6 @@
 import type { Resume } from "../types.js";
 import * as ats from "../../themes/ats/index.js";
+import * as clera from "../../themes/clera/index.js";
 import * as modernEuropass from "../../themes/modern-europass/index.js";
 import type { PdfRenderOptions } from "./pdf.js";
 
@@ -17,6 +18,7 @@ export const DEFAULT_THEME = "ats";
 
 const themes: Record<string, Theme> = {
   ats: { render: ats.render, pdf: ats.pdf, sectionHeadings: ats.sectionHeadings },
+  clera: { render: clera.render, pdf: clera.pdf, sectionHeadings: clera.sectionHeadings },
   "modern-europass": { render: modernEuropass.render, pdf: modernEuropass.pdf, sectionHeadings: modernEuropass.sectionHeadings },
 };
 

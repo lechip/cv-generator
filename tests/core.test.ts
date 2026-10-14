@@ -206,6 +206,7 @@ test("semantic HTML, Markdown and plain-text snapshots remain stable", async () 
   assert.equal(renderText(resume), await readFile(path.join(root, "tests/snapshots/standard.txt"), "utf8"));
   assert.equal(maskCss(renderHtml(resume, "modern-europass")), (await readFile(path.join(root, "tests/snapshots/standard.html"), "utf8")).trimEnd());
   assert.equal(maskCss(renderHtml(resume, "ats")), (await readFile(path.join(root, "tests/snapshots/standard.ats.html"), "utf8")).trimEnd());
+  assert.equal(maskCss(renderHtml(resume, "clera")), (await readFile(path.join(root, "tests/snapshots/standard.clera.html"), "utf8")).trimEnd());
 });
 
 test("the ats theme prints every contact item, the title line and standard headings", async () => {

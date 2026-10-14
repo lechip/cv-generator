@@ -60,3 +60,11 @@ test("ats-check documents the two-column limitation of modern-europass", { skip,
   assert.ok(report.findings.some((finding) => finding.code === "heading-not-isolated"));
   assert.ok(report.findings.some((finding) => finding.code === "words-glued"), "tagged PDFs lose spaces in strict parsers");
 });
+
+test("ats-check on the clera theme reports only the template's institution-and-dates line", { skip, timeout: 60_000 }, async () => {
+  const report = await check("profiles/example/printable-career.json", "clera");
+  const errors = report.findings.filter((finding) => finding.level === "error");
+  assert.ok(errors.length > 0);
+  assert.deepEqual([...new Set(errors.map((finding) => finding.code))], ["education-school-not-isolated"]);
+  assert.ok(!report.findings.some((finding) => finding.code === "words-glued"), "strict parsers must keep every space");
+});
