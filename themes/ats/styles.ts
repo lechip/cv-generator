@@ -78,8 +78,11 @@ h1, h2, h3, p, ul { margin: 0; }
 .tech-label { font-weight: 700; }
 .label-gap { margin-right: .3em; }
 .other-experience p { margin-bottom: .6mm; }
-.education-entry { margin-bottom: 1.8mm; break-inside: avoid; }
+/* Gap between entries must exceed 1.4x the line pitch: pdf.js-based parsers split entries on that ratio. */
+.education-entry { margin-bottom: 2.6mm; break-inside: avoid; }
 .education-degree { font-size: 10pt; font-weight: 700; }
+/* The space before the dates lands in its own text item, which strict parsers drop; the margin keeps a word gap. */
+.education-dates { margin-left: .3em; font-weight: 400; white-space: nowrap; }
 .plain-list { list-style: none; padding: 0; }
 .plain-list li { margin-bottom: .6mm; }
 .languages { list-style: none; padding: 0; }

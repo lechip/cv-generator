@@ -87,6 +87,7 @@ export function analyzeExtractedText(input: ParseInput): AtsFinding[] {
   analyzeContact(resume, lines, findings);
   const headingIndex = analyzeHeadings(input.expectedHeadings, lines, findings);
   analyzeWorkEntries(resume, lines, headingIndex, findings);
+  analyzeEducationEntries(resume, lines, findings);
 
   const orphans = lines.filter((line) => /^\d{4}$/.test(line.norm));
   if (orphans.length) findings.push(finding("warn", "date-orphan", `${orphans.length} line(s) hold only a year, so a date range wrapped: ${orphans.map((line) => `"${line.text}"`).join(", ")}.`));
@@ -192,6 +193,19 @@ function analyzeHeadings(expected: string[], lines: Line[], findings: AtsFinding
   }
   if (!ordered) findings.push(finding("warn", "heading-order", "Section headings appear in a different order than the theme emits them."));
   return found;
+}
+
+/** Parsers pick the school as the text item with a school word and no digits; a line shared with dates hides it. */
+function analyzeEducationEntries(resume: Resume, lines: Line[], findings: AtsFinding[]): void {
+  (resume.education ?? []).forEach((entry, index) => {
+    if (!entry.institution) return;
+    const institution = normalizeText(entry.institution);
+    if (lines.some((line) => line.norm === institution)) return;
+    const merged = lines.find((line) => line.norm.includes(institution));
+    findings.push(merged
+      ? finding("error", "education-school-not-isolated", `Institution "${entry.institution}" shares its line with other text: "${merged.text}".`, { path: `education[${index}]`, page: merged.page, hint: "Parsers read a line with dates as a date, not a school. The theme must print the institution on its own line." })
+      : finding("error", "education-school-missing", `Institution "${entry.institution}" was not found on one line in the PDF text.`, { path: `education[${index}]` }));
+  });
 }
 
 function analyzeWorkEntries(resume: Resume, lines: Line[], headingIndex: Map<string, number>, findings: AtsFinding[]): void {

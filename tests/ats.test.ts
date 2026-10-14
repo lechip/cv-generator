@@ -175,6 +175,15 @@ test("parse layer reports merged headings, split dates, hyphen breaks, footers a
   assert.ok(contactCodes.includes("contact-linkedin-missing"));
 });
 
+test("parse layer reports an institution that shares its line with the dates", () => {
+  const resume: Resume = { ...parseResume, education: [{ institution: "Example University", studyType: "Master of Science (MSc)", area: "Computer Science", startDate: "2013", endDate: "2016" }] };
+  const run = (lines: string[]) => codes(analyzeExtractedText({ pages: pages(lines), resume, html: renderHtml(resume, "ats"), structure, expectedHeadings: getTheme("ats").sectionHeadings(resume) }));
+  const education = ["EDUCATION", "Master of Science (MSc), Computer Science | 2013 - 2016", "Example University"];
+  assert.ok(!run([...goodLines, ...education]).some((code) => code.startsWith("education-school")));
+  assert.ok(run([...goodLines, "EDUCATION", "Master of Science (MSc), Computer Science", "Example University | 2013 - 2016"]).includes("education-school-not-isolated"));
+  assert.ok(run([...goodLines, "EDUCATION", "Master of Science (MSc), Computer Science | 2013 - 2016"]).includes("education-school-missing"));
+});
+
 test("job layer extracts skill terms and reports coverage deterministically", async () => {
   const jobText = await readFile(path.join(root, "tests/fixtures/job.txt"), "utf8");
   const extracted = extractJobTerms(jobText);

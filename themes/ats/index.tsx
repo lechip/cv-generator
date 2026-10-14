@@ -71,12 +71,17 @@ function Work({ entry }: { entry: WorkEntry }) {
   </article>;
 }
 
+/**
+ * The institution gets a line of its own. Parsers score each PDF text item; an item that also holds
+ * the dates reads as a date, not a school, and screeners report no education. The dates use the
+ * regular weight so the PDF emits them as a separate item from the bold degree.
+ */
 function Education({ entry }: { entry: EducationEntry }) {
   const degree = [entry.studyType, entry.area].filter(Boolean).join(", ");
   const dates = entry.startDate ? formatRange(entry.startDate, entry.endDate) : "";
   return <div className="education-entry">
-    <h3 className="education-degree">{degree || entry.institution}</h3>
-    <p className="education-school">{degree ? entry.institution : null}{degree && dates ? " | " : ""}{dates ? <span className="dates">{dates}</span> : null}</p>
+    <h3 className="education-degree">{degree || entry.institution}{dates ? <span className="education-dates"> | <span className="dates">{dates}</span></span> : null}</h3>
+    {degree ? <p className="education-school">{entry.institution}</p> : null}
   </div>;
 }
 
